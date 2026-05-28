@@ -1,21 +1,26 @@
+import path from 'node:path';
 import { defineConfig } from 'vite';
 import compression from 'compression';
 
-const VARIANT_MAP = {
-  'inline-wasm': 'verovio/wasm',
-  'split-wasm': 'verovio/wasm-split',
-  'light-wasm': 'verovio/wasm-light',
-  'light-split': 'verovio/wasm-light-split',
+const VARIANTS = {
+  'inline-wasm': { file: 'verovio-module.mjs', worktree: 'verovio' },
+  'split-wasm': { file: 'verovio-module-split.mjs', worktree: 'verovio-split' },
+  'light-wasm': { file: 'verovio-module-light.mjs', worktree: 'verovio-light' },
+  'light-split': { file: 'verovio-module-light-split.mjs', worktree: 'verovio-optimize' },
 };
 
 const variant = process.env.VARIANT ?? 'inline-wasm';
-const modulePath = VARIANT_MAP[variant];
+const config = VARIANTS[variant];
 
-if (!modulePath) {
+if (!config) {
   throw new Error(
-    `Unknown VARIANT "${variant}". Use one of: ${Object.keys(VARIANT_MAP).join(', ')}`,
+    `Unknown VARIANT "${variant}". Use one of: ${Object.keys(VARIANTS).join(', ')}`,
   );
 }
+
+const modulePath = path.resolve(
+  __dirname, '..', config.worktree, 'emscripten', 'npm', 'dist', config.file,
+);
 
 function wasmPreloadPlugin() {
   return {
@@ -35,6 +40,9 @@ function wasmPreloadPlugin() {
   };
 }
 
+// Vite's preview server does not gzip .wasm files by default, making split
+// variants appear slower than inline (which benefits from .js compression).
+// Production CDNs handle this automatically; this plugin closes the gap locally.
 function previewCompressionPlugin() {
   return {
     name: 'preview-compression',
@@ -57,5 +65,6 @@ export default defineConfig({
   build: {
     target: 'esnext',
     manifest: true,
+    outDir: `dist-${variant}`,
   },
 });
