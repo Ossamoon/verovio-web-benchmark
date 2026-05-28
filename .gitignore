@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Vite cache
+.vite/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Generated declaration files
+vite.config.d.ts
+
+# Benchmark results (regenerated per measurement)
+results/*.json
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# OS files
+.DS_Store
