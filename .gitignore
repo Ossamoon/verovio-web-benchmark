@@ -13,9 +13,6 @@ dist/
 # Generated declaration files
 vite.config.d.ts
 
-# Benchmark results (regenerated per measurement)
-results/*.json
-
 # Claude Code local settings
 .claude/settings.local.json
 
