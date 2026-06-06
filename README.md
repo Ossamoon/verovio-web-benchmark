@@ -27,11 +27,14 @@ A benchmark tool for comparing WASM loading strategies in [Verovio](https://gith
 | inline-wasm     | 12.7 s    | 12.7 s    | 0 ms     | 12.7 s      |
 | split-wasm      | 1.3 s     | 11.3 s    | 0 ms     | 1.3 s       |
 | light-wasm      | 9.8 s     | 9.8 s     | 0 ms     | 9.8 s       |
-| **light-split** | **1.3 s** | **8.7 s** | **0 ms** | **1.3 s**   |
+| **light-split** | **1.3 s** | **8.6 s** | **0 ms** | **1.3 s**   |
 
 - **split** reduces FCP by 90% (12.7s → 1.3s) — small JS enables immediate page paint
 - **light** reduces LCP by 23% (12.7s → 9.8s) — less data to transfer
-- **split + light** achieves the best LCP (8.7s, -31%) with the fastest FCP (1.3s)
+- **split + light** achieves the best LCP (8.6s, -32%) with the fastest FCP (1.3s)
+- **CLS** = 0 for every variant (the score is rendered once, with no layout shift)
+
+> The sample MEI is inlined into the JS bundle (Vite `?raw`) rather than fetched at runtime. Its ~10 KB still travels inside the JS — so it isn't off the critical path — but it's now an equal constant across all variants, with no separate request to contend with the `.wasm` download or to block module init.
 
 ### Web Vitals Mapping
 
@@ -74,6 +77,21 @@ git worktree add ../verovio-optimize feature/web-optimize
 ### WASM Build (once per worktree)
 
 ```bash
+cd ../verovio/emscripten
+./buildNpmPackage
+```
+
+```bash
+cd ../verovio-split/emscripten
+./buildNpmPackage
+```
+
+```bash
+cd ../verovio-light/emscripten
+./buildNpmPackage
+```
+
+```bash
 cd ../verovio-optimize/emscripten
 ./buildNpmPackage
 ```
@@ -105,6 +123,18 @@ Defaults to `inline-wasm` if omitted. See the [variant table](#verovio-web-bench
 VARIANT=inline-wasm npm run preview
 ```
 
+```bash
+VARIANT=split-wasm npm run preview
+```
+
+```bash
+VARIANT=light-wasm npm run preview
+```
+
+```bash
+VARIANT=light-split npm run preview
+```
+
 Vite's preview server defaults to port 4173 and auto-increments when the port is already in use, so multiple variants can run simultaneously (4173–4176).
 
 ### Lighthouse Measurement
@@ -114,4 +144,3 @@ Vite's preview server defaults to port 4173 and auto-increments when the port is
 3. Categories: **Performance** only
 4. Device: **Mobile** or **Desktop**
 5. Run "Analyze page load"
-

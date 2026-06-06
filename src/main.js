@@ -1,11 +1,9 @@
 import createModule from '#verovio-module';
 import { VerovioToolkit } from 'verovio/esm';
+import meiData from './sample.mei?raw';
 
 async function main() {
   const scoreEl = document.getElementById('score');
-
-  const response = await fetch('/sample.mei');
-  const meiData = await response.text();
 
   const wasmModule = await createModule();
 
